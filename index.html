@@ -311,16 +311,16 @@ details.card summary{cursor:pointer}
 .offladder{display:flex;gap:3px;margin-top:6px}.offladder span{flex:1;text-align:center;font-size:10px;border:2px solid var(--ink);background:#fff;opacity:.5}
 .offladder span.done{background:#c9f2e6;opacity:1}.offladder span.cur{background:#ffd6e3;opacity:1;font-weight:bold}
 .news{background:#fffbe6;border:2px solid #3a2e5c;padding:6px 8px;font-size:13px;margin-bottom:6px}
+.quizq{font-size:15px;font-weight:700;margin:8px 0;line-height:1.45}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <div id="modalBg"><div id="modal" class="px"></div></div>
 <div id="toast"></div>
-<script>
-'use strict';
+<script>'use strict';
 /* =============================================================
-   회귀한 MD가 K뷰티 전설이 되다 — v0.17
+   회귀한 MD가 K뷰티 전설이 되다 — v0.18
    단위: 돈 = 만원, 시간 = 주 (1달 = 4주, 1년 = 48주)
    레퍼런스: 게임개발 스토리 (카이로소프트)
    ============================================================= */
@@ -555,6 +555,10 @@ const DSTAGES = [
   {key:'pkg',n:'패키지 디자인',at:60,dims:['des'],boost:{des:3,orig:0.5},e:'🎨',q:'패키지 디자인은 누가 할까요?'},
   {key:'launch',n:'런칭 마케팅',at:85,dims:['buzz'],boost:{buzz:3},e:'📣',q:'런칭 마케팅은 누가 이끌까요?'}
 ];
+const QUIZ=[["성분 효능","나이아신아마이드의 대표 효능은?",["미백(멜라닌 이동 억제)","자외선 차단","각질 용해","제모"],0,"식약처 고시 미백 기능성 원료. 비타민 B3 계열로 피지 조절·장벽 개선에도 쓰인다.","쉬움"],["성분 효능","레티놀이 식약처에 고시된 기능성은?",["여드름 완화","미백","주름 개선","자외선 차단"],2,"레티놀은 주름 개선 기능성 고시 원료. 비타민 A 유도체다.","쉬움"],["성분 효능","다음 중 주름 개선 기능성 고시 원료는?",["알부틴","징크옥사이드","글리세린","아데노신"],3,"아데노신은 대표적인 주름 개선 고시 원료. 알부틴은 미백, 징크옥사이드는 자외선 차단.","보통"],["성분 효능","다음 중 미백 기능성 고시 원료가 아닌 것은?",["알부틴","알파-비사보롤","에칠아스코빌에텔","세라마이드"],3,"세라마이드는 보습·장벽 성분. 나머지 셋은 미백 고시 원료다.","보통"],["성분 효능","살리실산(BHA)이 모공 관리에 강한 이유는?",["지용성이라 모공 속 피지에 녹아든다","수용성이라 표면만 닦는다","수분을 끌어당긴다","자외선을 반사한다"],0,"BHA는 지용성이라 피지로 막힌 모공 안쪽까지 작용한다. AHA는 수용성.","보통"],["성분 효능","다음 중 AHA(알파하이드록시애씨드)에 속하는 성분은?",["판테놀","스쿠알란","글리콜릭애씨드","알란토인"],2,"글리콜릭애씨드·락틱애씨드가 대표 AHA. 피부 표면 각질을 녹인다.","보통"],["성분 효능","세라마이드의 주된 역할은?",["각질 용해","자외선 흡수","피부 장벽 지질 보충","멜라닌 생성 억제"],2,"각질층 세포 사이 지질의 큰 비중을 차지하는 장벽 성분.","쉬움"],["성분 효능","히알루론산의 대표 기능은?",["피지 흡착","수분을 끌어당겨 붙잡는 보습","자외선 차단","각질 제거"],1,"강력한 수분 보유력을 가진 대표 보습(휴멕턴트) 성분.","쉬움"],["성분 효능","병풀(센텔라아시아티카)의 대표 활성 성분이 아닌 것은?",["아데노신","마데카식애씨드","아시아티코사이드","마데카소사이드"],0,"병풀 4대 활성 성분은 마데카소사이드·아시아티코사이드·마데카식애씨드·아시아틱애씨드. 아데노신은 주름 원료.","어려움"],["성분 효능","판테놀은 어떤 비타민의 전구체일까?",["비타민 E","비타민 C","비타민 A","비타민 B5"],3,"판테놀은 피부에서 판토텐산(비타민 B5)으로 바뀌며 진정·보습에 쓰인다.","보통"],["성분 효능","다음 중 자외선 차단 성분은?",["징크옥사이드","아데노신","히알루론산","나이아신아마이드"],0,"징크옥사이드·티타늄디옥사이드는 대표 무기 자외선 차단 성분.","쉬움"],["성분 효능","흔히 '무기자차'로 분류되는 성분 조합은?",["레티놀·아데노신","에칠헥실메톡시신나메이트·옥토크릴렌","징크옥사이드·티타늄디옥사이드","글리세린·부틸렌글라이콜"],2,"무기(물리적) 자외선 차단제는 징크옥사이드·티타늄디옥사이드. 나머지 유기 필터는 '유기자차'.","보통"],["성분 효능","티트리 오일이 주로 쓰이는 피부 고민은?",["주름","트러블·진정","탄력","미백"],1,"항균·진정 이미지로 트러블 케어 제품에 많이 쓰인다.","쉬움"],["성분 효능","어성초의 다른 이름은?",["녹차","병풀","약모밀","감초"],2,"어성초(약모밀). 진정·트러블 케어 원료로 K뷰티에서 인기.","보통"],["성분 효능","스쿠알란의 특징으로 옳은 것은?",["강한 산성 각질 제거제","피부 지질과 비슷한 가벼운 오일","방부제","자외선 차단 성분"],1,"스쿠알렌을 안정화한 오일로 피부 친화도가 높고 가볍다.","보통"],["성분 효능","펩타이드를 가장 잘 설명한 것은?",["식물성 오일","산성 각질 제거제","아미노산 여러 개가 연결된 물질","무기 자외선 차단제"],2,"아미노산 사슬. 탄력·주름 케어 제품에 다양한 종류가 쓰인다.","쉬움"],["성분 효능","아이크림에 카페인을 넣는 주된 목적은?",["각질 제거","피지 흡착","붓기·다크서클 완화","자외선 차단"],2,"혈관 수축 작용으로 붓기 완화 목적으로 많이 쓰인다.","보통"],["성분 효능","글리세린의 역할로 가장 알맞은 것은?",["계면활성제","자외선 차단제","방부제","수분을 끌어오는 보습제(휴멕턴트)"],3,"가장 흔한 보습 성분 중 하나.","쉬움"],["성분 효능","PHA(글루코노락톤 등)가 AHA보다 순하다고 알려진 이유는?",["pH가 매우 높다","자외선을 막아서","분자가 커서 천천히 침투한다","오일이라서"],2,"분자량이 커서 침투가 느려 민감 피부용 각질 케어에 쓰인다.","어려움"],["성분 효능","트러블·홍조 케어에 쓰이는 산 성분은?",["아젤라익애씨드","히알루로닉애씨드","아스코빅애씨드","폴릭애씨드"],0,"아젤라익애씨드는 트러블·홍조·톤 케어에 쓰인다.","어려움"],["성분 효능","알란토인의 주된 용도는?",["각질 용해","진정·피부 보호","미백","자외선 차단"],1,"컴프리 뿌리 유래로 알려진 진정 성분.","보통"],["성분 효능","비타민 C 원형(L-아스코빅애씨드)의 약점은?",["끈적이지 않는다","물에 녹지 않는다","빛·공기에 쉽게 산화된다","향이 강하다"],2,"산화되면 갈색으로 변해 효과가 떨어진다. 그래서 유도체나 차광 용기를 쓴다.","보통"],["성분 효능","다음 중 보습 성분이 아닌 것은?",["우레아","소듐하이알루로네이트","벤조일퍼옥사이드","베타글루칸"],2,"벤조일퍼옥사이드는 여드름 치료(의약품) 성분. 나머지는 보습 성분.","보통"],["성분 효능","PDRN은 원래 어디서 추출한 성분으로 유명할까?",["녹차 잎","달팽이 점액","연어(정소)","쌀 발효액"],2,"연어 DNA 유래 성분으로 유명하다. 최근엔 식물 유래 PDRN도 나온다.","보통"],["성분 효능","달팽이 점액 여과물의 대표 이미지는?",["피지 흡착","보습·재생","자외선 차단","강한 각질 제거"],1,"보습·피부 컨디션 케어 원료로 K뷰티 대표 성분 중 하나.","쉬움"],["성분 궁합","레티놀과 함께 쓰면 자극이 커질 수 있는 성분은?",["AHA·BHA","히알루론산","스쿠알란","세라마이드"],0,"둘 다 각질·턴오버에 작용해 같이 쓰면 자극·건조가 커질 수 있다. 번갈아 쓰는 게 안전.","쉬움"],["성분 궁합","레티놀을 쓰는 기간 낮에 꼭 챙겨야 하는 것은?",["알코올 토너","스크럽","필링젤","자외선 차단제"],3,"레티놀은 자외선 민감도를 높이고 빛에 분해되기도 해서 밤 사용 + 낮 선크림이 기본.","쉬움"],["성분 궁합","AHA 필링 후 가장 중요한 관리는?",["스크럽 추가","강한 클렌징","사우나","자외선 차단"],3,"각질이 얇아져 자외선에 예민해진다.","쉬움"],["성분 궁합","'같이 쓰면 안 된다'는 말이 오해에 가깝다고 알려진 조합은?",["나이아신아마이드 + 비타민 C","레티놀 + BHA","레티놀 + AHA","AHA + BHA + 스크럽"],0,"예전 실험 조건에서 나온 이야기로, 일반 제형에서는 함께 써도 대체로 문제없다고 알려져 있다.","어려움"],["성분 궁합","비타민 C와 레티놀을 함께 쓸 때 흔히 권하는 방법은?",["둘 다 밤에 섞어서","같은 날 쓰면 절대 안 됨","비타민 C는 아침, 레티놀은 밤","둘 다 아침"],2,"비타민 C는 아침 항산화, 레티놀은 밤에 나눠 쓰는 루틴이 일반적.","보통"],["성분 궁합","보습 시너지가 좋은 조합은?",["알코올 + 향료","히알루론산 + 세라마이드","BHA + 스크럽","레티놀 + 고농도 AHA"],1,"수분을 끌어오는 성분과 장벽 지질 성분은 궁합이 좋다.","쉬움"],["성분 궁합","레티놀과 함께 쓰면 자극 완화에 도움이 된다고 알려진 성분은?",["살리실산","에탄올","나이아신아마이드","글리콜릭애씨드"],2,"장벽 강화 성분이라 레티놀 루틴에 자주 같이 쓰인다.","보통"],["성분 궁합","벤조일퍼옥사이드와 같은 시간에 바르면 효과가 떨어질 수 있다고 알려진 것은?",["판테놀","트레티노인 등 일부 레티노이드","세라마이드","히알루론산"],1,"벤조일퍼옥사이드가 일부 레티노이드를 산화시킬 수 있다.","어려움"],["성분 궁합","민감 피부가 특히 주의하면 좋은 성분은?",["세라마이드","향료·고농도 에탄올","알란토인","판테놀"],1,"향료와 고농도 알코올은 민감 피부 자극 요인으로 자주 꼽힌다.","쉬움"],["성분 궁합","임신 중 사용을 피하라고 흔히 권하는 성분은?",["레티노이드","글리세린","히알루론산","세라마이드"],0,"비타민 A 유도체는 임신 중 피하라는 권고가 일반적. 반드시 전문의와 상담.","보통"],["성분 궁합","구리 펩타이드와 같은 시간대 사용을 피하라고 흔히 말하는 성분은?",["세라마이드","스쿠알란","L-아스코빅애씨드(비타민 C)","글리세린"],2,"서로 효과를 떨어뜨릴 수 있다는 이유로 시간대를 나누라는 권장이 많다.","어려움"],["성분 궁합","각질 제거제를 여러 개 겹쳐 쓰면 생기기 쉬운 문제는?",["피지 증가로 번들거림만","아무 문제 없음","장벽 손상·자극","미백 효과 상승"],2,"과도한 각질 제거는 장벽을 무너뜨려 홍조·따가움을 부른다.","쉬움"],["사용 순서","기본 스킨케어 순서로 올바른 것은?",["선크림→토너→크림→세럼","클렌징→토너→세럼→크림→선크림","토너→선크림→크림→세럼","크림→세럼→토너→선크림"],1,"묽은 제형에서 무거운 제형 순, 아침엔 선크림으로 마무리.","쉬움"],["사용 순서","아침 스킨케어에서 선크림의 위치는?",["스킨케어 마지막(메이크업 전)","토너 바로 다음","세럼 전","클렌징 전"],0,"스킨케어 마지막 단계, 메이크업 전에 바른다.","쉬움"],["사용 순서","이중 세안의 일반적인 순서는?",["토너 → 오일","폼 클렌저 → 오일 클렌저","오일·밤 클렌저 → 폼 클렌저","크림 → 폼"],2,"유성 노폐물을 오일로 녹이고 폼으로 마무리.","쉬움"],["사용 순서","여러 제품을 바를 때 기본 원칙은?",["오일 → 토너","무거운 제형 → 가벼운 제형","가벼운 제형 → 무거운 제형","아무 순서나 상관없다"],2,"묽은 것부터 발라야 흡수가 막히지 않는다.","쉬움"],["사용 순서","시트 마스크 사용 후 다음 단계로 알맞은 것은?",["클렌징 오일","스크럽","남은 에센스를 두드려 흡수 후 크림으로 마무리","바로 세안"],2,"마스크 후 수분이 날아가지 않게 크림으로 덮어준다.","쉬움"],["사용 순서","클렌징 밤의 올바른 사용법은?",["크림 다음","젖은 얼굴에 바로","마른 손, 마른 얼굴에 사용","토너 다음"],2,"물이 묻으면 유화가 빨리 일어나 메이크업이 잘 안 녹는다.","보통"],["사용 순서","레티놀 제품은 언제 바르는 게 일반적일까?",["운동 직전","아침 선크림 위","외출 직전","밤"],3,"빛에 분해되기 쉽고 자외선 민감도를 높여 밤 사용이 일반적.","쉬움"],["사용 순서","선크림 재도포 권장 간격으로 흔히 안내되는 것은?",["일주일에 1번","12시간마다","하루 1번이면 충분","2~3시간마다"],3,"땀·마찰로 지워지므로 2~3시간마다 덧바르기를 권한다.","쉬움"],["사용 순서","얼굴 선크림 적정량으로 흔히 안내되는 양은?",["500원 동전 크기","손바닥 가득","콩알 하나","쌀알 한 톨"],0,"충분히 발라야 표시된 SPF 효과에 가까워진다.","보통"],["사용 순서","토너 패드는 보통 어느 단계에 쓸까?",["크림 다음","메이크업 다음","세안 직후","선크림 다음"],2,"세안 후 결 정리·각질 케어용으로 첫 단계에 쓴다.","쉬움"],["브랜드·제품","브랜드와 대표 제품의 연결이 틀린 것은?",["라운드랩 - 1025 독도 토너","조선미녀 - 시카페어 크림","아누아 - 어성초 77 수딩 토너","토리든 - 다이브인 세럼"],1,"시카페어 크림은 닥터자르트. 조선미녀는 맑은쌀 선크림이 유명.","보통"],["브랜드·제품","'어드밴스드 스네일 96 뮤신 파워 에센스'의 브랜드는?",["메디힐","코스알엑스","달바","라곰"],1,"코스알엑스의 대표 달팽이 에센스.","보통"],["브랜드·제품","'마다가스카르 센텔라 앰플'로 유명한 브랜드는?",["에스트라","비욘드","구달","스킨1004"],3,"스킨1004의 대표 센텔라 라인.","보통"],["브랜드·제품","'아토베리어365 크림'의 브랜드는?",["리얼베리어","에스트라","제로이드","일리윤"],1,"에스트라의 대표 장벽 크림.","보통"],["브랜드·제품","'퓨어 클렌징 오일'로 유명한 브랜드는?",["마녀공장","바닐라코","한스킨","믹순"],0,"마녀공장의 대표 클렌징 오일.","보통"],["브랜드·제품","'청귤 비타C 잡티케어 세럼'의 브랜드는?",["구달","웰라쥬","셀리맥스","아이소이"],0,"구달의 청귤 비타C 라인.","보통"],["브랜드·제품","'마데카 크림'으로 유명한 브랜드는?",["파티온","닥터지","센텔리안24","퓨리토"],2,"센텔리안24(동국제약)의 대표 크림.","보통"],["브랜드·제품","'레이저 썬스크린 100'의 브랜드는?",["라운드랩","아떼","셀퓨전씨","토코보"],2,"셀퓨전씨의 대표 선크림.","보통"],["브랜드·제품","'바이오 콜라겐 리얼 딥 마스크'로 유명한 브랜드는?",["바이오던스","메디큐브","메디힐","넘버즈인"],0,"바이오던스의 대표 하이드로겔 마스크.","보통"],["브랜드·제품","브랜드와 대표 제품의 연결이 틀린 것은?",["이니스프리 - 그린티 씨드 세럼","헤라 - 천기단","설화수 - 윤조에센스","라네즈 - 워터 슬리핑 마스크"],1,"천기단은 더 후(후). 헤라는 블랙 쿠션이 유명.","보통"],["브랜드·제품","'타임 레볼루션 더 퍼스트 트리트먼트 에센스'의 브랜드는?",["더페이스샵","토니모리","네이처리퍼블릭","미샤"],3,"미샤의 대표 발효 에센스.","보통"],["브랜드·제품","'레드 블레미쉬 클리어 수딩 크림'의 브랜드는?",["CNP차앤박","닥터자르트","에스트라","닥터지"],3,"닥터지의 대표 진정 크림.","보통"],["브랜드·제품","'노스카나인 트러블 세럼'으로 알려진 브랜드는?",["브링그린","파티온","셀라피","아비브"],1,"파티온의 대표 트러블 세럼.","어려움"],["브랜드·제품","'프로폴리스 에너지 앰플'의 브랜드는?",["하루하루원더","믹순","원씽","CNP차앤박"],3,"CNP차앤박의 대표 앰플.","보통"],["브랜드·제품","브랜드와 대표 제품의 연결이 틀린 것은?",["달바 - 1025 독도 토너","메디힐 - 티트리 에센셜 마스크","일리윤 - 세라마이드 아토 집중 크림","닥터자르트 - 시카페어 크림"],0,"1025 독도 토너는 라운드랩. 달바는 화이트 트러플 스프레이 세럼이 유명.","보통"],["업계 용어","ODM을 가장 잘 설명한 것은?",["온라인 직판","브랜드가 설계한 대로 제조만 위탁","제조사가 개발(처방)부터 생산까지 해서 공급","원료 수입 대행"],2,"OEM은 주문자 설계대로 생산, ODM은 제조사가 개발까지 맡는다.","보통"],["업계 용어","MOQ의 뜻은?",["최대 출고 수량","품질 검사 기준","월간 주문량","최소 주문 수량"],3,"Minimum Order Quantity. 공장이 받는 최소 생산 단위.","쉬움"],["업계 용어","SKU를 가장 잘 설명한 것은?",["재고 관리용 개별 상품 단위","광고 클릭 수","배송 단위 박스","상품 판매 가격"],0,"같은 제품이라도 용량·색상이 다르면 SKU가 다르다.","쉬움"],["업계 용어","ROAS의 뜻은?",["광고비 대비 매출","전환율","광고 노출 수","클릭당 비용"],0,"Return On Ad Spend. 매출 ÷ 광고비.","쉬움"],["업계 용어","CPC의 뜻은?",["구매당 비용","클릭당 광고 비용","1,000회 노출당 비용","월 고정 광고비"],1,"Cost Per Click.","쉬움"],["업계 용어","SPF는 어떤 자외선의 차단 지수일까?",["UVA","블루라이트","UVB","적외선"],2,"SPF는 화상을 일으키는 UVB 차단 지수. UVA는 PA로 표시한다.","보통"],["업계 용어","PA 등급은 무엇을 나타낼까?",["UVA 차단 정도","pH","UVB 차단 정도","방수력"],0,"PA+부터 PA++++까지 표시한다.","보통"],["업계 용어","'논코메도제닉' 테스트는 무엇을 확인할까?",["자외선 차단력","향 지속력","미백 효과","모공을 막아 여드름을 유발하는지"],3,"면포(코메도) 유발 가능성 테스트.","보통"],["업계 용어","'하이포알러제닉' 표시의 의미에 가장 가까운 것은?",["알레르기 반응 가능성을 낮추도록 테스트·설계","천연 성분 100%","유기농 인증","알레르기가 절대 안 생김"],0,"'가능성을 낮춘다'는 의미이지 알레르기가 없다는 보장은 아니다.","보통"],["업계 용어","'에멀전'은 무엇을 뜻할까?",["가루 제형","오일만 있는 제형","물과 오일을 섞은 유화 제형","젤 제형"],2,"유화 제형. 로션·크림이 대표적.","쉬움"],["업계 용어","건강한 피부 표면 pH로 흔히 말하는 범위는?",["중성(7)","강알칼리(10 이상)","약산성(약 4.5~5.5)","강산성(1~2)"],2,"그래서 약산성 클렌저가 유행했다.","보통"],["업계 용어","'속건조'를 가장 잘 설명한 것은?",["피부 전체가 각질로 덮인 상태","겉은 번들거리는데 속은 수분이 부족한 상태","피부가 하얘진 상태","땀이 많은 상태"],1,"유분은 많고 수분은 부족한 수부지 피부.","쉬움"],["업계 용어","'PB'의 뜻은?",["병행 수입 브랜드","유통사 자체 브랜드","프리미엄 브랜드","해외 브랜드"],1,"Private Brand. 올리브영·편의점 자체 브랜드 등.","쉬움"],["업계 용어","'공구'를 가장 잘 설명한 것은?",["공급 구조","인플루언서가 팔로워 대상으로 진행하는 공동구매","공식 구매처","공장 구매"],1,"인플루언서 공동구매. 단기간 매출이 크게 터진다.","쉬움"],["업계 용어","'UGC'의 뜻은?",["유통사 기획전","브랜드 공식 광고","소비자가 직접 만든 콘텐츠(후기 등)","유료 검색 광고"],2,"User Generated Content.","쉬움"],["업계 용어","CGMP는 무엇일까?",["우수화장품 제조 및 품질관리기준","화장품 광고 심의 기준","수출 인증 제도","친환경 포장 기준"],0,"식약처가 운영하는 화장품 제조 품질관리 기준.","어려움"],["업계 용어","국내에서 화장품을 자기 브랜드로 유통·판매하려면 등록해야 하는 업종은?",["통신판매중개업만","화장품책임판매업","의약품도매업","식품제조업"],1,"제조업·책임판매업·맞춤형화장품판매업으로 나뉜다.","어려움"],["업계 용어","'PAO'(열린 뚜껑 그림 + 12M 등) 표시는 무엇을 뜻할까?",["개봉 후 사용 기간","용량","유통기한 남은 일수","제조일"],0,"Period After Opening. 개봉 후 12개월 안에 쓰라는 뜻.","보통"],["업계 용어","EWG 성분 등급을 만든 곳은?",["미국의 비영리 환경단체","유럽연합","한국 식약처","일본 후생노동성"],0,"미국 Environmental Working Group의 데이터베이스. 공식 안전 규제 기준은 아니다.","보통"],["업계 용어","'더마 코스메틱'의 의미에 가장 가까운 것은?",["색조 화장품","천연 비누","향수","피부과학 기반 기능 중심 화장품"],3,"Dermatology + Cosmetic.","쉬움"],["업계 용어","'클린 뷰티'를 가장 잘 설명한 것은?",["무향 제품만 해당","유해 논란 성분을 배제하고 투명하게 공개하는 콘셉트","물로만 만든 화장품","무조건 유기농 인증 제품"],1,"법적 정의는 없고 브랜드마다 기준이 다르다.","보통"],["업계 용어","'맞춤형화장품조제관리사'는 무엇일까?",["매장에서 고객 맞춤으로 화장품을 혼합·소분할 수 있는 국가자격","화장품 광고 심의위원","원료 수입 대행업자","피부과 전문의"],0,"맞춤형화장품 판매장에 두어야 하는 국가자격.","어려움"],["업계 용어","'리뉴얼'을 할 때 흔히 바뀌지 않는 것은?",["패키지 디자인","브랜드명","처방 일부","용량"],1,"리뉴얼은 같은 브랜드에서 패키지·처방·용량 등을 개선하는 것.","쉬움"],["규제·제도","다음 중 기능성화장품 종류가 아닌 것은?",["체중 감량","주름 개선","미백","자외선 차단"],0,"체중 감량은 화장품 효능이 아니다.","쉬움"],["규제·제도","화장품 광고에 쓰면 안 되는 표현은?",["촉촉한 보습감","아토피 치료","은은한 향","산뜻한 사용감"],1,"질병 치료·예방 표현은 의약품 오인 광고로 금지.","쉬움"],["규제·제도","화장품 '전성분 표시제'의 내용은?",["주요 성분 3개만 표시","수출용만 표시","사용한 모든 성분을 표시","향료만 표시"],2,"원칙적으로 함량이 많은 순서대로 모든 성분을 표시한다.","쉬움"],["규제·제도","자외선 차단 제품에 표시할 수 있는 SPF 최대 표기는?",["제한 없음","SPF50+","SPF100","SPF200"],1,"SPF 50 이상은 'SPF50+'로 표시한다.","보통"],["규제·제도","PA 등급의 최고 표기는?",["PA+++++","PA+++","PA++++","PA MAX"],2,"PA+부터 PA++++까지.","보통"],["규제·제도","미백 기능성 화장품이 광고할 수 있는 효능은?",["영구 미백","피부 질환 치료","피부 미백에 도움","기미 완치"],2,"'도움을 준다'까지가 허용 범위. 완치·치료는 안 된다.","보통"],["규제·제도","일본에서 미백·여드름 예방 등을 표방할 수 있는 '약용화장품' 분류는?",["건강식품","일반화장품","의약부외품","의약품"],2,"일본은 효능 표방을 하려면 의약부외품 승인이 필요하다.","보통"],["규제·제도","국내에서 동물실험한 화장품에 대한 원칙은?",["원칙적으로 유통·판매 금지(예외 있음)","향수만 금지","제한 없음","수출용만 금지"],0,"2017년부터 원칙적으로 금지, 일부 예외 조항이 있다.","어려움"],["규제·제도","세정 제품에 사용이 금지된 것은?",["정제수","코코베타인","미세플라스틱(마이크로비즈)","글리세린"],2,"환경 문제로 국내에서 사용이 금지됐다.","보통"],["규제·제도","화장품 용기에 반드시 표시해야 하는 것이 아닌 것은?",["판매 직원 이름","책임판매업자 상호","제조번호","사용기한 또는 개봉 후 사용기간"],0,"제조번호·사용기한·업자 정보 등은 필수 표시 사항.","보통"],["규제·제도","'의사가 추천한 화장품'처럼 전문가 추천을 내세우는 광고의 문제는?",["해외에서만 금지","의사·약사 등이 보증하는 듯한 광고는 금지 대상","SNS에선 허용","아무 문제 없음"],1,"전문가가 공인·추천하는 것처럼 오인시키는 표현은 금지된다.","보통"],["규제·제도","2017년부터 기능성화장품에 새로 포함된 범주가 아닌 것은?",["여드름성 피부 완화(세정 제품)","아토피성 피부 건조함 완화","체중 감량","탈모 증상 완화"],2,"모발·여드름·아토피 건조 등 범위가 넓어졌다. 체중 감량은 해당 없음.","어려움"],["규제·제도","화장품 광고에서 '최고', '최상' 같은 표현은?",["객관적 근거 없이 쓰면 문제가 될 수 있다","식약처 승인 문구","의무 표기","언제나 허용"],0,"배타적 표현은 실증 자료 없이 쓰면 부당 광고가 될 수 있다.","보통"],["규제·제도","중국에 일반 화장품을 정식 수출할 때 거쳐야 하는 것은?",["현지 당국(NMPA) 등록·신고","한국 식약처 승인만","절차 없음","대사관 인증만"],0,"중국은 별도 등록·신고 절차가 필요하다.","어려움"],["규제·제도","화장품 사용 후 이상 반응이 생기면 첫 번째로 할 일은?",["사우나로 땀을 뺀다","다른 제품을 덧바른다","더 많이 발라본다","사용을 중단하고 필요하면 전문의 상담"],3,"용기에도 표시되는 기본 주의사항.","쉬움"]];
+const QUIZ_CAT={plan:['브랜드·제품','업계 용어'],form:['성분 효능','성분 궁합'],pkg:['사용 순서','규제·제도'],launch:['규제·제도','업계 용어']};
+const QUIZ_D={'쉬움':[1.15,0.92],'보통':[1.2,0.9],'어려움':[1.3,0.87]};
+const RES_ROLES=['연구원','수석연구원','뷰티디렉터'];
 // 브랜드 광고 (연령대별 팬)
 const ADS = [
   {k:'인스타그램 광고',c:300,seg:['20대','30대'],f:110,st:1},
@@ -810,11 +814,11 @@ function startDev(cfg){
   // cfg: {cat,con,tar,method,weeks,startPct,qBonus,mode,seqOf,cost,auto}
   S.cash -= cfg.cost;
   const M = METHODS[cfg.method||0];
-  S.dev = Object.assign({type:'product', prog:cfg.startPct||0, pts:[0,0,0,0,0,0], issues:0, hype:0, leads:{}, done:{}, burn:{}, prop:{}}, cfg);
+  S.dev = Object.assign({type:'product', prog:cfg.startPct||0, pts:[0,0,0,0,0,0], issues:0, hype:0, leads:{}, done:{}, burn:{}, prop:{}, qm:{}, qz:{ok:0,n:0}, crit:0}, cfg);
   S.dev.weeks = Math.max(3, Math.round((cfg.weeks||8)*M.wk));
   S.dev.hype = Math.round(Math.min(60,(S.fans[cfg.tar]||0)/300) + S.aware/4);
   if(S.rdBoost){ S.dev.rd=S.rdBoost; S.rdBoost=0; }
-  if(cfg.seqOf){ const o=S.products.find(p=>p.id===cfg.seqOf); if(o){ S.dev.pts=o.dims.map(v=>v*0.3); S.dev.hype+=30; } }
+  if(cfg.seqOf){ const o=S.products.find(p=>p.id===cfg.seqOf); if(o){ S.dev.pts=o.xr? o.xr.map(x=>x*mstd()*0.3) : o.dims.map(v=>v*0.3); S.dev.hype+=30; } }
   log(`🧴 신제품 개발 시작: <b>${cfg.con} ${cfg.cat}</b> (타깃: ${cfg.tar} ${cfg.trb||''} · ${M.k})${cfg.mode?' · '+cfg.mode:''}`);
   // 첫 단계(기획) 담당 지정
   const st0 = DSTAGES[0];
@@ -830,7 +834,7 @@ function stageCheck(){
     if(d.pending===st.key) return true;
     const team=devTeam().slice().sort((a,b)=>stageScore(b,st)-stageScore(a,st));
     if(!team.length){ d.done[st.key]=true; continue; }
-    if(d.auto){ assignLead(st, team[0]); continue; }
+    if(d.auto){ assignLead(st, team[0], true); continue; }
     d.pending=st.key;
     queueModal({title:`${st.e} ${st.n} 담당 지정 (${st.at}%)`, body:`<div>${st.q} <span class="muted">담당자는 ${st.dims.map(k=>STATN[k]).join('·')}에 큰 보너스를 준다.</span></div>
       <div class="muted" style="font-size:12px;margin-top:4px">같은 파트를 같은 사람에게 연속으로 맡기면 지쳐서 성과가 떨어진다.</div>`,
@@ -841,16 +845,70 @@ function stageCheck(){
   }
   return false;
 }
-function assignLead(st, s){
-  const d=S.dev; d.pending=null; d.done[st.key]=true;
+function assignLead(st, s, auto){
+  const d=S.dev; d.pending=null; d.done[st.key]=true; d.qm=d.qm||{}; d.qz=d.qz||{ok:0,n:0};
   const n=streakOf(st.key,s.id), bf=burnF(n);
   (S.partHist[st.key]=S.partHist[st.key]||[]).push(s.id); if(S.partHist[st.key].length>6) S.partHist[st.key].shift();
   for(const k of st.dims){ d.leads[k]=s.id; d.burn[k]=bf; }
   let tot=0; const M=METHODS[d.method||0];
-  for(const k in st.boost){ const add = s.st[k]*st.boost[k]*0.5*rnd(0.8,1.2)*bf*hrBuff()*M.pm; d.pts[DK.indexOf(k)] += add; tot+=add; }
-  floatAt(s.id, `${st.e} +${Math.round(tot)}`, '#2a7');
+  const sc=stageScore(s,st), cp=clamp(sc/1500 + (RES_ROLES.includes(s.role)&&st.key==='form'?0.05:0) + (s.role==='뷰티디렉터'?0.05:0), 0.02, 0.35);
+  let cm=1; if(Math.random()<cp){ cm = Math.random()<0.15?3:2; d.crit=(d.crit||0)+1; }
+  for(const k in st.boost){ const add = s.st[k]*st.boost[k]*0.5*rnd(0.8,1.2)*bf*hrBuff()*M.pm*cm; d.pts[DK.indexOf(k)] += add; tot+=add; }
+  if(cm>1){ floatAt(s.id, `${cm>2?'🌟 대성공':'✨ CRITICAL'} ×${cm}`, '#e0a000'); toast(`${cm>2?'🌟':'✨'} ${esc(s.name)}의 ${st.n} <b>크리티컬 ×${cm}!</b> (확률 ${Math.round(cp*100)}%)`); log(`${cm>2?'🌟':'✨'} ${st.n} 크리티컬 ×${cm} — ${esc(s.name)}`); }
+  else floatAt(s.id, `${st.e} +${Math.round(tot)}`, '#2a7');
   log(`${st.e} ${st.n} 담당: <b>${esc(s.name)}</b>${n?` (${n+1}연속 · 효율 ${Math.round(bf*100)}%)`:''}`);
+  if(auto||S.quizAuto) quizByLead(st,s); else quizAsk(st,s);
   render();
+}
+// ---------- 개발 퀴즈 ----------
+function quizPick(stKey){
+  S.quizSeen=S.quizSeen||[]; const cats=QUIZ_CAT[stKey]||[];
+  let pool=QUIZ.map((q,i)=>i).filter(i=>cats.includes(QUIZ[i][0]) && !S.quizSeen.includes(i));
+  if(!pool.length) pool=QUIZ.map((q,i)=>i).filter(i=>!S.quizSeen.includes(i));
+  if(!pool.length){ S.quizSeen=[]; pool=QUIZ.map((q,i)=>i); }
+  const i=pick(pool); S.quizSeen.push(i); if(S.quizSeen.length>60) S.quizSeen.shift(); return i;
+}
+function quizLeadP(st,s){ return clamp(0.4 + stageScore(s,st)/700 + (RES_ROLES.includes(s.role)?0.04:0), 0.4, 0.92); }
+function quizApply(st, qi, ok, who){
+  const d=S.dev; if(!d||d.type!=='product') return;
+  const q=QUIZ[qi], m=QUIZ_D[q[5]]||QUIZ_D['보통'], f=ok?m[0]:m[1];
+  d.qm=d.qm||{}; d.qz=d.qz||{ok:0,n:0};
+  for(const k of st.dims) d.qm[k]=(d.qm[k]||1)*f;
+  d.qz.n++; if(ok) d.qz.ok++;
+  S.quizStat=S.quizStat||{ok:0,n:0}; if(!who){ S.quizStat.n++; if(ok) S.quizStat.ok++; }
+  const pct=Math.round((f-1)*100), dn=st.dims.map(k=>STATN[k]).join('·');
+  log(`${ok?'⭕':'❌'} ${st.n} 퀴즈 ${ok?'정답':'오답'}${who?` (${esc(who)}가 대신 풀었다)`:''} → ${dn} ${pct>0?'+':''}${pct}%`);
+  return {f,pct,dn};
+}
+function quizByLead(st,s){
+  const qi=quizPick(st.key), ok=Math.random()<quizLeadP(st,s); quizApply(st,qi,ok,s.name);
+  floatAt(s.id, ok?'⭕ 퀴즈 정답':'❌ 퀴즈 오답', ok?'#2bb673':'#ef476f');
+}
+function quizAsk(st,s){
+  const qi=quizPick(st.key), q=QUIZ[qi], m=QUIZ_D[q[5]]||QUIZ_D['보통'];
+  const order=[0,1,2,3].sort(()=>Math.random()-0.5);
+  const sc=stageScore(s,st), hint=Math.random()<clamp((sc-150)/500,0,0.7);
+  const wrong=order.filter(i=>i!==q[3]), strike=hint?pick(wrong):-1, lp=quizLeadP(st,s);
+  const dn=st.dims.map(k=>STATN[k]).join('·');
+  queueModal({title:`${st.e} ${st.n} 퀴즈`, body:`<div class="row"><span class="tag">${q[0]}</span><span class="tag ${q[5]==='어려움'?'g4':q[5]==='보통'?'g3':'g2'}">${q[5]}</span></div>
+    <div class="quizq">Q. ${esc(q[1])}</div>
+    <div class="muted" style="font-size:12px">정답이면 ${dn} <b style="color:#2bb673">+${Math.round((m[0]-1)*100)}%</b> · 오답이면 <b style="color:#ef476f">${Math.round((m[1]-1)*100)}%</b></div>
+    ${hint?`<div class="muted" style="font-size:12px;margin-top:4px">💭 ${esc(s.name)}: "하나는 확실히 아닌 것 같아요."</div>`:''}`,
+    choices:[...order.map((i,n)=>({label:`${'①②③④'[n]} ${q[2][i]}`, cls:i===strike?'gray':'', disabled:i===strike, sub:i===strike?'💭 담당자: 이건 아니에요':'',
+        fn:()=>quizResult(st,qi,i===q[3],q[2][i])})),
+      {label:`🙋 ${s.name}에게 맡기기`, cls:'gray', sub:`담당자 정답률 약 ${Math.round(lp*100)}% (${STATN[st.dims[0]]} 능력 기준)`, fn:()=>{ const ok=Math.random()<lp; quizResult(st,qi,ok,null,s.name); }}]});
+}
+function quizResult(st,qi,ok,ans,who){
+  const r=quizApply(st,qi,ok,who); if(!r) return; const q=QUIZ[qi];
+  jingle(ok?'hit':'crisis',0.25);
+  const qs=S.quizStat||{ok:0,n:0};
+  queueModal({title: ok?'⭕ 정답!':'❌ 오답...', body:`${who?`<div class="muted">${esc(who)}이(가) 대신 풀었다.</div>`:''}
+    <div class="quizq" style="font-size:13px">Q. ${esc(q[1])}</div>
+    <div>정답: <b>${esc(q[2][q[3]])}</b>${!ok&&ans?`<br><span class="muted">내 답: ${esc(ans)}</span>`:''}</div>
+    <div class="card" style="margin-top:6px;font-size:12px">💡 ${esc(q[4])}</div>
+    <div style="margin-top:6px">${r.dn} <b style="color:${ok?'#2bb673':'#ef476f'}">${r.pct>0?'+':''}${r.pct}%</b></div>
+    ${qs.n?`<div class="muted" style="font-size:11px">내 누적 정답률 ${Math.round(qs.ok/qs.n*100)}% (${qs.ok}/${qs.n})</div>`:''}`,
+    choices:[{label:'개발 계속'},{label:S.quizAuto?'다음부터 직접 풀기':'다음부터 담당자에게 맡기기', cls:'gray', fn:()=>{ S.quizAuto=!S.quizAuto; toast(S.quizAuto?'🙋 개발 퀴즈는 담당자가 풉니다':'✍️ 개발 퀴즈를 직접 풉니다'); }}]});
 }
 function proposalCheck(){
   const d=S.dev; if(!d||d.type!=='product') return;
@@ -876,11 +934,13 @@ function devTick(){
   if(d.phase==='qc') return qcTick();
   if(stageCheck()) return;
   const M=METHODS[d.method||0], hb=hrBuff()*(1+0.06*(catLv(d.cat)-1));
-  for(const s of devTeam()){
-    const f = (0.6+Math.random()*0.8) * (s.stamina<20?0.35:s.stamina<45?0.75:1) * (0.7+s.morale/250);
+  const dteam=devTeam().slice().sort((a,b)=>DK.reduce((t,k)=>t+b.st[k]*wOf(b.role,k),0)-DK.reduce((t,k)=>t+a.st[k]*wOf(a.role,k),0));
+  dteam.forEach((s,ti)=>{
+    const f = (0.6+Math.random()*0.8) * (s.stamina<20?0.35:s.stamina<45?0.75:1) * (0.7+s.morale/250) * (ti<8?1:0.12);
     let mult=1, fx='';
-    const r=Math.random();
-    if(r<0.05){ mult=0.15; fx='😵 슬럼프'; } else if(r<0.10){ mult=3; fx='💡 번뜩!'; }
+    const r=Math.random(), ms=mainStat(s), isR=RES_ROLES.includes(s.role);
+    const cp=clamp(0.02 + ms/2500 + (isR?0.03:0), 0.02, isR?0.25:0.15), sp=Math.max(0.01, 0.05 - ms/4000);
+    if(r<sp){ mult=0.15; fx='😵 슬럼프'; } else if(r<sp+cp){ if(Math.random()<0.15){ mult=5; fx='🌟 대박 아이디어!'; } else { mult=3; fx='💡 번뜩!'; } d.crit=(d.crit||0)+1; }
     let tot=0, led=0;
     DK.forEach((k,i)=>{ let w=wOf(s.role,k); if(d.leads[k]===s.id){ w+=0.7*(d.burn[k]||1); led++; }
       const add=s.st[k]*w*hb*f*mult*M.pm*DEV*(d.rd&&(k==='eff'||k==='safe')?1+0.2*(d.rd===true?1:d.rd):1); d.pts[i]+=add; tot+=add;
@@ -888,8 +948,8 @@ function devTick(){
     s.stamina = clamp(s.stamina - rnd(4,8) - led*0.8, 0, 100);
     s.exp += 3 + led*0.6;
     S.kp += 0.25*M.kp;
-    floatAt(s.id, fx || ('+'+Math.round(tot)), fx==='😵 슬럼프'?'#888':fx?'#e0a000':'#2bb673');
-  }
+    if(ti<8||fx) floatAt(s.id, fx || ('+'+Math.round(tot)), fx==='😵 슬럼프'?'#888':fx?'#e0a000':'#2bb673');
+  });
   d.issues += rnd(0.5,2)*M.iss;
   // 사고 (초반 2년 제외)
   if(abs()>=96 && Math.random()<0.025){ const i=ri(0,5); d.pts[i]*=0.75; toast(`⚡ 정전 사고! ${DIMN[i]} 작업 일부 유실`); log(`⚡ 정전으로 ${DIMN[i]} 작업 일부 유실`); }
@@ -911,13 +971,17 @@ function qcTick(){
 function releaseNow(){ if(S.dev&&S.dev.phase==='qc'){ releaseProduct(); render(); } }
 const DEV=0.3;
 function mstd(){ return Math.round(Math.min(700, 40+1.6*abs())); }
-function dimScores(d){ const qb=(d.qBonus||0)+((FACT[factLv()]||{}).q||0); return d.pts.map(p=>clamp(Math.round(p + mstd()*qb/100),1,999)); }
+function dimScores(d){ const qb=(d.qBonus||0)+((FACT[factLv()]||{}).q||0), qm=d.qm||{}; return d.pts.map((p,i)=>Math.max(1,(p + mstd()*qb/100)*(qm[DK[i]]||1))); }
+// 시장 기준 대비 비율 x → 999점 (x=1 → 400 A급, x≈1.8 → 600 S급, 999는 사실상 불가)
+const DIM_K=1.96;
+function dimDisp(x){ return clamp(Math.round(999*(1-Math.exp(-x/DIM_K))),1,995); }
 function normDims(dims,std){ return dims.map(v=>clamp(Math.round(60*Math.pow(v/std,0.7)),1,100)); }
 function releaseProduct(){
   const d=S.dev; S.dev=null;
-  const raw=dimScores(d), std=mstd();
-  if(S.ipBonus){ raw[5]=Math.min(999,Math.round(raw[5]*1.3)); raw[3]=Math.min(999,Math.round(raw[3]*1.15)); }
-  const dims=normDims(raw,std);
+  const pts=dimScores(d), std=mstd();
+  if(S.ipBonus){ pts[5]*=1.3; pts[3]*=1.15; }
+  const xr=pts.map(p=>p/std), raw=xr.map(dimDisp);
+  const dims=xr.map(x=>clamp(Math.round(60*Math.pow(x,0.7)),1,100));
   const quality = Math.round(dims.reduce((a,v,i)=>a+v*QW[i],0)), score=Math.round(raw.reduce((a,v,i)=>a+v*QW[i],0));
   const g = compat(d.cat,d.con,d.tar,d.trb);
   const gb = {4:1.4,3:0.6,2:0,1:-1.6}[g];
@@ -946,7 +1010,7 @@ function releaseProduct(){
   // 같은 카테고리 겹침
   const same = S.products.filter(x=>!x.disc && x.cat===d.cat && abs()-x.rel<20);
   same.forEach(x=>x.catPen=(x.catPen||1)*0.85);
-  const pr = {id:S.nextId++, name:defName, baseName: base?(base.baseName||base.name):null, cat:d.cat, con:d.con, tar:d.tar, trb:d.trb, grade:g, dims:raw, nd:dims, std, score, quality, reviews, avg, sum,
+  const pr = {id:S.nextId++, name:defName, baseName: base?(base.baseName||base.name):null, cat:d.cat, con:d.con, tar:d.tar, trb:d.trb, grade:g, dims:raw, xr:xr.map(x=>Math.round(x*100)/100), nd:dims, std, score, qz:d.qz, crit:d.crit||0, quality, reviews, avg, sum,
     hof: sum>=32, outcome:oi, outShown:false, rel:abs(), base:cat.price, ratio:d.ratio||TPREF[d.tar], price:cat.price*(d.ratio||TPREF[d.tar]), stock:0, orders:[], mkt:0, viral:0, ugc:0, negUgc:0,
     susp:0, sold:0, rev:0, week:0, seqOf:d.seqOf||null, seqN, hasSeq:false, seriesClosed:false,
     seqBonus: base ? 1.3*Math.pow(0.85,seqN-2) : 1, lastOrder:abs(), copyRisk:d.mode==='미투', hype:d.hype||0, issues:d.issues||0,
@@ -975,7 +1039,7 @@ function releaseModal(p,key,base){
   return {title:`🚀 출시 준비: 리뷰 도착!`, body:`
     <div class="row"><span class="tag">${p.cat}</span><span class="tag">${p.con}</span><span class="tag">${p.tar}</span><span class="tag">${p.trb}</span>${p.issues>0?`<span class="tag" style="background:#ffc2c2">남은 이슈 ${p.issues}건</span>`:''}</div>
     <div class="muted" style="margin-top:6px">제품 이름</div><input id="pname" class="nameinput" maxlength="20" value="${esc(p.name)}">
-    <div class="card" style="margin:8px 0"><b>제품력 ${p.score} <span class="muted">(출시 당시 시장 기준 ${p.std})</span></b>${staffBars(p.dims)}</div>
+    <div class="card" style="margin:8px 0"><b>제품력 ${p.score} <span class="tag">${grade(p.score)}급</span> <span class="muted">(시장 평균 = 400 A급)</span></b>${p.qz&&p.qz.n?`<div class="muted" style="font-size:12px">📝 개발 퀴즈 ${p.qz.ok}/${p.qz.n} 정답${p.crit?` · ✨ 크리티컬 ${p.crit}회`:''}</div>`:p.crit?`<div class="muted" style="font-size:12px">✨ 크리티컬 ${p.crit}회</div>`:''}${staffBars(p.dims)}</div>
     <div class="revs">${p.reviews.map(r=>`<div class="rev">${r.rv.e} <b>${r.rv.n}</b><div class="sc">${r.sc}<span class="muted">/10</span></div>${esc(r.c)}</div>`).join('')}</div>
     <div class="hofline">${p.hof?`🏛️ 리뷰 합계 <b>${p.sum}점</b> — <b>명예의 전당</b> 입성! 후속작을 만들 수 있다.`:`리뷰 합계 <b>${p.sum}점</b> <span class="muted">(32점 이상이면 명예의 전당)</span>`}
     ${base&&!p.hof?'<br>😢 후속작이 명예의 전당에 들지 못해 <b>시리즈가 막을 내렸다.</b>':''}</div>
@@ -1003,7 +1067,7 @@ function outcomeReveal(p){
   if(p.copyRisk && Math.random()<0.25){ S.trust=clamp(S.trust-12,0,100); log(`🗞️ ${esc(p.name)} "카피 제품" 논란... 신뢰 하락`); }
   log(`📊 ${esc(p.name)} 첫 달 성적: <b>${o.k}</b>`);
   queueModal({onOpen:()=>{ if(p.outcome===2) jingle('hit'); else if(p.outcome===0) jingle('crisis',0.6); }, title:`📊 ${esc(p.name)} 첫 달 성적`, body:`<div style="text-align:center">${p.outcome===2?icoHtml('fire','pop'):p.outcome===0?icoHtml('cloud','pop'):''}${itemHtml(p.cat,'big')}</div><div class="big-outcome">${o.k}${p.outcome===2?'!!':p.outcome===1?'!':'...'}</div>
-    <div class="row" style="justify-content:center"><span class="muted">궁합</span><span class="tag g${p.grade}">${GRADE[p.grade].name}</span><span class="muted">제품력 ${p.score} <span class="muted">(출시 당시 시장 기준 ${p.std})</span></span>${p.hof?'<span class="tag g4">🏛️ 명예의 전당</span>':''}</div>
+    <div class="row" style="justify-content:center"><span class="muted">궁합</span><span class="tag g${p.grade}">${GRADE[p.grade].name}</span><span class="muted">제품력 ${p.score}${p.xr?` (${grade(p.score)}급)`:` <span class="muted">(출시 당시 시장 기준 ${p.std})</span>`}</span>${p.hof?'<span class="tag g4">🏛️ 명예의 전당</span>':''}</div>
     <p style="text-align:center">${p.outcome===2?'입소문이 제대로 탔다! 재고를 넉넉히 준비하자.':p.outcome===1?'나쁘지 않은 출발. 마케팅으로 더 밀어볼까?':'시장 반응이 차갑다... 그래도 품질이 좋다면 마케팅으로 역주행할 수도.'}</p>`, choices:[{label:'확인'}]});
 }
 
@@ -2385,7 +2449,7 @@ function tabProducts(){
     const o=OUT[p.outcome]; const pend=p.orders.reduce((a,x)=>a+x.qty,0);
     return `<div class="card"><div class="row" style="justify-content:space-between"><h4>${itemHtml(p.cat,'sm')} ${p.hof?'🏛️ ':''}${esc(p.name)} <button class="btn sm" style="padding:0 5px;font-size:11px" onclick="renameP(${p.id})">✏️</button></h4>
       <span>${p.outShown?`<span class="tag ${o.cls}">${o.k}</span>`:'<span class="tag">집계 중</span>'} <span class="tag">리뷰 ${p.sum}</span></span></div>
-      ${staffBars(p.dims)}<div class="muted">${p.tar} ${p.trb} · 제품력 ${p.score} <span class="muted">(출시 당시 시장 기준 ${p.std})</span> · 출시 ${abs()-p.rel}주차${p.susp>abs()?` · <b style="color:#ef476f">⛔ 판매정지 D-${p.susp-abs()}</b>`:''}${p.adStrike?` · <span style="color:#ef476f">🚨 과대광고 ${p.adStrike}/3</span>`:''}${(p.adBan||0)>abs()&&!(p.susp>abs())?` · 광고 정지 ${p.adBan-abs()}주`:''}${p.seriesClosed?' · 시리즈 종료':''}${(p.catPen||1)<0.95?' · ⚠️카테고리 겹침':''}${p.chart&&p.chart.rank?` · 📈첫 주 ${p.chart.rank}위`:''}${p.compPen>abs()?' · ⚔️경쟁 신제품 −15%':''}</div>
+      ${staffBars(p.dims)}<div class="muted">${p.tar} ${p.trb} · 제품력 ${p.score}${p.xr?` (${grade(p.score)}급)`:` <span class="muted">(출시 당시 시장 기준 ${p.std})</span>`} · 출시 ${abs()-p.rel}주차${p.susp>abs()?` · <b style="color:#ef476f">⛔ 판매정지 D-${p.susp-abs()}</b>`:''}${p.adStrike?` · <span style="color:#ef476f">🚨 과대광고 ${p.adStrike}/3</span>`:''}${(p.adBan||0)>abs()&&!(p.susp>abs())?` · 광고 정지 ${p.adBan-abs()}주`:''}${p.seriesClosed?' · 시리즈 종료':''}${(p.catPen||1)<0.95?' · ⚠️카테고리 겹침':''}${p.chart&&p.chart.rank?` · 📈첫 주 ${p.chart.rank}위`:''}${p.compPen>abs()?' · ⚔️경쟁 신제품 −15%':''}</div>
       <div class="muted">🏷️ ${won(p.price).toLocaleString()}원 (${tierName(p.ratio||1)}) · 원가 ${won(unitCost(p)).toLocaleString()}원 · 마진율 <b>${Math.round((p.price*(1-FEE)-unitCost(p))/p.price*100)}%</b> <button class="btn sm" style="padding:0 6px;font-size:12px" onclick="openPrice(${p.id})">가격 조정</button></div>
       <div class="stat-grid"><div>주간 판매 <b>${p.week.toLocaleString()}</b>${p.lostLast?` <span style="color:#ef476f">(품절로 ${p.lostLast.toLocaleString()} 놓침)</span>`:''}</div><div>재고 <b>${p.stock.toLocaleString()}</b>${pend?` (+${pend.toLocaleString()} 입고 대기)`:''}</div><div>누적 ${moneyShort(p.rev)}</div>
       <div>마케팅 열기 ${(p.mkt*100).toFixed(0)}%</div><div>UGC ${Math.round(p.ugc)}${p.negUgc>5?` / 부정 ${Math.round(p.negUgc)}`:''}</div><div>${p.viral>0.3?'🔥 바이럴 중':''}</div></div>
@@ -2610,7 +2674,7 @@ function showStart(){
     </div>
     <div style="margin-top:8px"><button class="btn gray" id="opv" style="font-size:12px;padding:4px 10px">🎬 오프닝 보기</button></div>
     <div class="card" style="text-align:left;margin-top:14px;font-size:13px">
-      <b>플레이 방법</b><br>· 시간은 자동으로 흐릅니다 (⏸로 일시정지, ▶▶로 빠르게)<br>· 🧴 신제품 기획 → 조합·개발 방식 선택 → 단계마다 담당자 지정 → QC 후 출시<br>· 리뷰 합계 32점 이상이면 🏛️명예의 전당, 후속작을 낼 수 있어요<br>· 직원을 뽑을 땐 예상 능력치만 보여요. 진짜 실력은 일을 시켜봐야 알아요<br>· 💡노하우로 직원 레벨업·전직·개발 부스트를 해요<br>· 자금이 부족하면 🤝외주로 버티세요. 3달 연속 적자면 부도!</div></div>`;
+      <b>플레이 방법</b><br>· 시간은 자동으로 흐릅니다 (⏸로 일시정지, ▶▶로 빠르게)<br>· 🧴 신제품 기획 → 조합·개발 방식 선택 → 단계마다 담당자 지정 + 화장품 퀴즈(정답 시 제품력↑) → QC 후 출시<br>· 리뷰 합계 32점 이상이면 🏛️명예의 전당, 후속작을 낼 수 있어요<br>· 직원을 뽑을 땐 예상 능력치만 보여요. 진짜 실력은 일을 시켜봐야 알아요<br>· 💡노하우로 직원 레벨업·전직·개발 부스트를 해요<br>· 자금이 부족하면 🤝외주로 버티세요. 3달 연속 적자면 부도!</div></div>`;
   $('#opv').onclick=()=>{ SND.started=true; playOpening(null, ()=>{}); };
   $('#go').onclick=()=>{ const n=$('#bn').value.trim()||'나의 브랜드', ceo=$('#cn').value.trim()||'나'; SND.started=true;
     playOpening(n, ()=>{ newGame(n, ceo); speed=0; showGame(); playBgm('bgm');
@@ -2619,7 +2683,6 @@ function showStart(){
 }
 document.addEventListener('keydown',e=>{ if(!S||modalOpen) return; if(e.code==='Space' && document.activeElement.tagName!=='INPUT'){ e.preventDefault(); setSpeed(speed?0:1); } });
 showStart();
-
 </script>
 </body>
 </html>
